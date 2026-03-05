@@ -170,7 +170,7 @@ table.tbl td{padding:11px 14px;font-size:14px;border-bottom:1px solid var(--bord
         <div class="form-group"><label class="form-label">Login</label><input class="inp" id="r-login" placeholder="Login único"></div>
         <div class="form-group"><label class="form-label">Senha</label><input class="inp" id="r-pass" type="password" placeholder="Senha"></div>
       </div>
-      <div class="form-group"><label class="form-label">Email</label><input class="inp" id="r-email" placeholder="seu@email.com"></div>
+      
       <button class="btn btn-primary" style="width:100%" onclick="doRegister()">Cadastrar</button>
     </div>
     <!-- MANAGER -->
@@ -185,7 +185,7 @@ table.tbl td{padding:11px 14px;font-size:14px;border-bottom:1px solid var(--bord
         <div class="form-group"><label class="form-label">Login</label><input class="inp" id="m-login" placeholder="Login único"></div>
         <div class="form-group"><label class="form-label">Senha</label><input class="inp" id="m-pass" type="password" placeholder="Senha"></div>
       </div>
-      <div class="form-group"><label class="form-label">Email</label><input class="inp" id="m-email" placeholder="seu@email.com"></div>
+      
       <button class="btn btn-primary" style="width:100%" onclick="doManagerRegister()">Cadastrar como Gestor</button>
     </div>
   </div>
@@ -255,11 +255,11 @@ var users, managers, activities, mgrActs, messages, tasks;
 
 function initData() {
   users = JSON.parse(localStorage.getItem('db_users') || 'null') || [
-    {id:1,name:"Carlos Silva",role:"Desenvolvedor",department:"TI",login:"carlos",password:"123",email:"carlos@iastudio.com",type:"collaborator"},
-    {id:2,name:"Ana Costa",role:"Designer",department:"Criação",login:"ana",password:"123",email:"ana@iastudio.com",type:"collaborator"}
+    {id:1,name:"Carlos Silva",role:"Desenvolvedor",department:"TI",login:"carlos",password:"123",type:"collaborator"},
+    {id:2,name:"Ana Costa",role:"Designer",department:"Criação",login:"ana",password:"123",type:"collaborator"}
   ];
   managers = JSON.parse(localStorage.getItem('db_managers') || 'null') || [
-    {id:1,name:"Roberto Lima",role:"Gestor Geral",department:"Gestão",login:"gestor",password:"admin",email:"gestor@iastudio.com",type:"manager"}
+    {id:1,name:"Roberto Lima",role:"Gestor Geral",department:"Gestão",login:"gestor",password:"admin",type:"manager"}
   ];
   activities = JSON.parse(localStorage.getItem('db_activities') || 'null') || {
     1:{"2025-03-01":["Reunião de planejamento","Revisão de código"],"2025-03-02":["Desenvolvimento de feature"],"2025-03-04":["Correção de bugs"]},
@@ -347,11 +347,11 @@ function doRegister() {
   var dept=document.getElementById('r-dept').value.trim();
   var login=document.getElementById('r-login').value.trim();
   var pass=document.getElementById('r-pass').value;
-  var email=document.getElementById('r-email').value.trim();
-  if(!name||!role||!dept||!login||!pass||!email){ showErr('Preencha todos os campos.'); return; }
+  
+  if(!name||!role||!dept||!login||!pass){ showErr('Preencha todos os campos.'); return; }
   var all=users.concat(managers);
   for(var i=0;i<all.length;i++){ if(all[i].login===login){ showErr('Login já em uso.'); return; } }
-  var u={id:Date.now(),name:name,role:role,department:dept,login:login,password:pass,email:email,type:'collaborator'};
+  var u={id:Date.now(),name:name,role:role,department:dept,login:login,password:pass,type:'collaborator'};
   users.push(u); activities[u.id]={}; save();
   alert('Cadastro realizado! Faça login.');
   switchTab('login');
@@ -366,11 +366,11 @@ function doManagerRegister() {
   var dept=document.getElementById('m-dept').value.trim();
   var login=document.getElementById('m-login').value.trim();
   var pass=document.getElementById('m-pass').value;
-  var email=document.getElementById('m-email').value.trim();
-  if(!name||!role||!dept||!login||!pass||!email){ showErr('Preencha todos os campos.'); return; }
+  
+  if(!name||!role||!dept||!login||!pass){ showErr('Preencha todos os campos.'); return; }
   var all=users.concat(managers);
   for(var i=0;i<all.length;i++){ if(all[i].login===login){ showErr('Login já em uso.'); return; } }
-  managers.push({id:Date.now(),name:name,role:role,department:dept,login:login,password:pass,email:email,type:'manager'}); save();
+  managers.push({id:Date.now(),name:name,role:role,department:dept,login:login,password:pass,type:'manager'}); save();
   alert('Gestor cadastrado! Faça login.');
   switchTab('login');
 }
@@ -555,22 +555,20 @@ function renderMgr(page) {
     if(fUsers.length===0) html+='<div class="card">'+emptyState('📭','Nenhum resultado.')+'</div>';
   }
   else if(page==='team') {
-    html='<div class="page-title">Colaboradores</div><div class="page-subtitle">Gerencie os colaboradores da equipe. Somente o gestor pode remover.</div>';
+    html='<div class="page-title">Colaboradores</div><div class="page-subtitle">Clique na lixeira 🗑 para remover um colaborador da equipe.</div>';
     html+='<div class="card">';
-    if(users.length===0){ html+=emptyState('👥','Nenhum colaborador cadastrado.'); }
-    else {
-      html+='<table class="tbl"><thead><tr><th>Nome</th><th>Login</th><th>Cargo</th><th>Depto</th><th>Email</th><th>Ação</th></tr></thead><tbody>';
+    if(users.length===0){
+      html+=emptyState('👥','Nenhum colaborador cadastrado.');
+    } else {
       users.forEach(function(u){
-        html+='<tr>';
-        html+='<td class="bold">'+esc(u.name)+'</td>';
-        html+='<td class="dim">'+esc(u.login)+'</td>';
-        html+='<td>'+esc(u.role)+'</td>';
-        html+='<td><span class="tag tag-gold">'+esc(u.department)+'</span></td>';
-        html+='<td class="dim">'+esc(u.email)+'</td>';
-        html+='<td><button class="btn-remove" onclick="removeCollab('+u.id+',\''+esc(u.name)+'\')">🗑 Remover</button></td>';
-        html+='</tr>';
+        html+='<div class="act-item" style="margin-bottom:10px;padding:16px;">';
+        html+='<div style="flex:1">';
+        html+='<div class="bold" style="font-size:15px;margin-bottom:4px">'+esc(u.name)+'</div>';
+        html+='<div class="dim">'+esc(u.role)+' · <span class="tag tag-gold">'+esc(u.department)+'</span></div>';
+        html+='</div>';
+        html+='<button onclick="removeCollab('+u.id+',\''+esc(u.name)+'\')" style="background:transparent;border:1px solid var(--danger);color:var(--danger);padding:8px 16px;border-radius:8px;cursor:pointer;font-size:18px;transition:all 0.2s;font-weight:bold;" onmouseover="this.style.background=\'var(--danger)\';this.style.color=\'white\'" onmouseout="this.style.background=\'transparent\';this.style.color=\'var(--danger)\'">🗑️</button>';
+        html+='</div>';
       });
-      html+='</tbody></table>';
     }
     html+='</div>';
   }
