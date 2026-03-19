@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Diário de Bordo Lion">
 <meta name="theme-color" content="#FFD700">
-<link rel="manifest" href="manifest.json?v=20260319-03">
+<link rel="manifest" href="/manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png?v=20260319-03">
 <link rel="icon" type="image/png" href="icon-192.png?v=20260319-03">
 <title>DIÁRIO DE BORDO LION</title>
@@ -1860,15 +1860,23 @@ window.addEventListener('pageshow', function(e){
 });
 
 if('serviceWorker' in navigator){
-  // Limpa todos os service workers e caches antigos para garantir versão mais recente
-  navigator.serviceWorker.getRegistrations().then(function(regs){
-    regs.forEach(function(reg){ reg.unregister(); });
-  });
-  if(window.caches){
-    caches.keys().then(function(keys){
-      keys.forEach(function(k){ caches.delete(k); });
+  // Registra o service worker PWA
+  navigator.serviceWorker.register('/sw.js')
+    .then(function(reg){
+      console.log('[PWA] Service Worker registrado:', reg.scope);
+      // Verifica atualização em background
+      reg.addEventListener('updatefound', function(){
+        var newWorker = reg.installing;
+        newWorker.addEventListener('statechange', function(){
+          if(newWorker.state === 'installed' && navigator.serviceWorker.controller){
+            console.log('[PWA] Nova versão disponível.');
+          }
+        });
+      });
+    })
+    .catch(function(err){
+      console.warn('[PWA] Falha ao registrar SW:', err);
     });
-  }
 }
 
 function updateReleaseBadge(){
@@ -1880,10 +1888,10 @@ function updateReleaseBadge(){
 function forceAppRefresh(){
   try {
     if('serviceWorker' in navigator){
-      navigator.serviceWorker.getRegistrations().then(function(regs){ regs.forEach(function(reg){ reg.unregister(); }); });
-    }
-    if(window.caches){
-      caches.keys().then(function(keys){ keys.forEach(function(k){ caches.delete(k); }); });
+      // Força update do SW sem desregistrar
+      navigator.serviceWorker.getRegistrations().then(function(regs){
+        regs.forEach(function(reg){ reg.update(); });
+      });
     }
   } catch(e) {}
   var clean=window.location.href.split('?')[0].split('#')[0];

@@ -1,12 +1,14 @@
 {
-  "name": "Diário de Bordo — I.A Studio",
-  "short_name": "Diário de Bordo",
-  "description": "Sistema de relatórios e atividades I.A Studio",
-  "start_url": "./index.html",
+  "name": "Diário de Bordo LION",
+  "short_name": "DB Lion",
+  "description": "Sistema de relatórios e atividades — Identidade Lion",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#0A0A0A",
   "theme_color": "#FFD700",
-  "orientation": "portrait-primary",
+  "lang": "pt-BR",
   "icons": [
     {
       "src": "icon-192.png",
@@ -21,6 +23,6 @@
       "purpose": "any maskable"
     }
   ],
-  "categories": ["business", "productivity"],
-  "lang": "pt-BR"
+  "categories": ["productivity", "business"],
+  "screenshots": []
 }
